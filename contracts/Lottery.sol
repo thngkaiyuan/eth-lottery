@@ -21,7 +21,7 @@ contract Lottery {
 	uint public upper_bound;
 
 	function Lottery() {
-		ticket_price = 1;
+		ticket_price = 0.1 ether;
 		waiting_period = 1 weeks;
 		lower_bound = 0;
 		upper_bound = 100;
