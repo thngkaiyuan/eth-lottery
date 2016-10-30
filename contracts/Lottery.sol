@@ -24,7 +24,7 @@ contract Lottery {
 		ticket_price = 1;
 		waiting_period = 1 weeks;
 		lower_bound = 0;
-		upper_bound = 1000;
+		upper_bound = 100;
 		reset_state();
 	}
 
