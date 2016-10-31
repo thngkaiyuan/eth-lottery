@@ -81,9 +81,13 @@ contract Lottery {
 		var call_incentive = this.balance * 1 / 100;
 
 		// Distribute prize amongst winners
-		var split_prize = total_prize / bets_lengths[winning_number];
-		for (uint i = 0; i < bets_lengths[winning_number]; i++) {
-			if (!bets[winning_number][i].send(split_prize)) throw;
+		var num_of_winners = bets_lengths[winning_number];
+
+		if (num_of_winners > 0) {
+			var split_prize = total_prize / num_of_winners;
+			for (uint i = 0; i < num_of_winners; i++) {
+				if (!bets[winning_number][i].send(split_prize)) throw;
+			}
 		}
 
 		// Reward caller of draw function
