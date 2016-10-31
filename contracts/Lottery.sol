@@ -99,7 +99,7 @@ contract Lottery {
 
 	function get_winning_number() private returns (uint) {
 		var range = (upper_bound - lower_bound) + 1;
-		var offset = uint256(block.blockhash(block.number)) % range;
+		var offset = uint256(block.blockhash(block.number-1)) % range;
 		return lower_bound + offset;
 	}
 
