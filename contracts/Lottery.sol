@@ -70,26 +70,26 @@ contract Lottery {
 	 * Starts the draw for the existing round (if conditions are met)
 	 */
 	function draw() payable public {
-		// check guard conditions
+		// Check guard conditions
 		if (now - start_date < waiting_period) throw;
 
-		// pick winning number
+		// Pick winning number
 		var winning_number = get_winning_number();
 
 		// Calculate prizes
 		var total_prize = this.balance * 19 / 20;
 		var call_incentive = this.balance * 1 / 100;
 
-		// distribute prize amongst winners
+		// Distribute prize amongst winners
 		var split_prize = total_prize / bets_lengths[winning_number];
 		for (uint i = 0; i < bets_lengths[winning_number]; i++) {
 			if (!bets[winning_number][i].send(split_prize)) throw;
 		}
 
-		// reward caller of draw function
+		// Reward caller of draw function
 		if (!msg.sender.send(call_incentive)) throw;
 
-		// reset state to allow new bets
+		// Reset state to allow new bets
 		reset_state();
 	}
 
