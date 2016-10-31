@@ -77,8 +77,8 @@ contract Lottery {
 		var winning_number = get_winning_number();
 
 		// Calculate prizes
-		var total_prize = this.balance * 19 / 20;
-		var call_incentive = this.balance * 1 / 100;
+		var total_prize = this.balance * 4 / 5;
+		var call_incentive = this.balance * 1 / 20;
 
 		// Distribute prize amongst winners
 		var num_of_winners = bets_lengths[winning_number];
