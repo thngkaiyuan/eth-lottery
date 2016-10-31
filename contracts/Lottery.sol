@@ -69,7 +69,7 @@ contract Lottery {
 	/**
 	 * Starts the draw for the existing round (if conditions are met)
 	 */
-	function draw() public {
+	function draw() payable public {
 		// check guard conditions
 		if (now - start_date < waiting_period) throw;
 
