@@ -54,7 +54,7 @@ contract Lottery {
 	/**
 	 * Takes a guess from the player and adds it to the existing round
 	 */
-	function bet(uint guess) public {
+	function make_bet(uint guess) payable public {
 		// Check if the sender sent the correct amount
 		if (msg.value != ticket_price) throw;
 
