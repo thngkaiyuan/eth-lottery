@@ -7,7 +7,9 @@ module.exports = {
     "app.css": [
       "stylesheets/app.css"
     ],
-    "images/": "images/"
+    "stylesheets/": "stylesheets/",
+    "images/": "images/",
+    "javascripts/": "javascripts/"
   },
   rpc: {
     host: "localhost",

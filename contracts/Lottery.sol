@@ -28,6 +28,7 @@ contract Lottery {
 
     // Events
     event Drawn(address _drawer, uint winning_number, uint num_winners);
+    event Betted(address _better, uint bet);
 
     function Lottery(uint _waiting_period) {
         ticket_price = 0.1 ether;
@@ -76,6 +77,7 @@ contract Lottery {
 
         // { guess => address } is recorded for prize distribution later
         insert_bet(guess, msg.sender);
+        Betted(msg.sender, guess);
     }
 
 
