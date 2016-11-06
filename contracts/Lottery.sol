@@ -2,105 +2,124 @@ pragma solidity ^0.4.2;
 
 contract Lottery {
 
-	// price of a ticket
-	uint public ticket_price;
+    // price of a ticket
+    uint public ticket_price;
 
-	// waiting period to draw
-	uint public waiting_period;
+    // waiting period to draw
+    uint public waiting_period;
 
-	// date when lottery is opened
-	uint public start_date;
+    // date when lottery is opened
+    uint public start_date;
 
-	// { guess => [address] }
-	mapping(uint => address[]) public bets;
-	// { guess => [address].length }
-	mapping(uint => uint) public bets_lengths;
+    // total bets
+    uint public total_bets;
 
-	// bounds of guess
-	uint public lower_bound;
-	uint public upper_bound;
+    // { guess => [address] }
+    mapping(uint => address[]) public bets;
+    // { guess => [address].length }
+    mapping(uint => uint) public bets_lengths;
 
-	function Lottery(uint _waiting_period) {
-		ticket_price = 0.1 ether;
-		waiting_period = _waiting_period;
-		lower_bound = 0;
-		upper_bound = 100;
-		reset_state();
-	}
+    // bounds of guess
+    uint public lower_bound;
+    uint public upper_bound;
 
-	function reset_state() private {
-		start_date = now;
-		clear_all_bets();
-	}
+    // organiser of the lottery
+    address public organiser;
 
-	function insert_bet(uint guess, address better) private {
-		var index = bets_lengths[guess];
+    // Events
+    event Drawn(address _drawer, uint winning_number, uint num_winners);
 
-		if (index == bets[guess].length) {
-			bets[guess].push(better);
-		} else {
-			bets[guess][index] = better;
-		}
+    function Lottery(uint _waiting_period) {
+        ticket_price = 0.1 ether;
+        waiting_period = _waiting_period;
+        lower_bound = 0;
+        upper_bound = 100;
+        total_bets = 0;
+        organiser = msg.sender;
+        reset_state();
+    }
 
-		bets_lengths[guess] += 1;
-	}
+    function reset_state() private {
+        start_date = now;
+        clear_all_bets();
+    }
 
-	function clear_all_bets() private {
-		for (uint i = lower_bound; i <= upper_bound; i++) {
-			bets_lengths[i] = 0;
-		}
-	}
+    function insert_bet(uint guess, address better) private {
+        var index = bets_lengths[guess];
 
-	/**
-	 * Takes a guess from the player and adds it to the existing round
-	 */
-	function make_bet(uint guess) payable public {
-		// Check if the sender sent the correct amount
-		if (msg.value != ticket_price) throw;
+        if (index == bets[guess].length) {
+            bets[guess].push(better);
+        } else {
+            bets[guess][index] = better;
+        }
 
-		// Check if the guess is valid
-		if (lower_bound > guess || guess > upper_bound) throw;
+        bets_lengths[guess] += 1;
+        total_bets += 1;
+    }
 
-		// { guess => address } is recorded for prize distribution later
-		insert_bet(guess, msg.sender);
-	}
+    function clear_all_bets() private {
+        for (uint i = lower_bound; i <= upper_bound; i++) {
+            bets_lengths[i] = 0;
+        }
+        total_bets = 0;
+    }
+
+    /**
+    * Takes a guess from the player and adds it to the existing round
+    */
+    function make_bet(uint guess) payable public {
+        // Check if the sender sent the correct amount
+        if (msg.value != ticket_price) throw;
+
+        // Check if the guess is valid
+        if (lower_bound > guess || guess > upper_bound) throw;
+
+        // { guess => address } is recorded for prize distribution later
+        insert_bet(guess, msg.sender);
+    }
 
 
-	/**
-	 * Starts the draw for the existing round (if conditions are met)
-	 */
-	function draw() payable public {
-		// Check guard conditions
-		if (now - start_date < waiting_period) throw;
+    /**
+    * Starts the draw for the existing round (if conditions are met)
+    */
+    function draw() payable public {
+        // Check guard conditions
+        if (now - start_date < waiting_period) throw;
 
-		// Pick winning number
-		var winning_number = get_winning_number();
+        // Pick winning number
+        var winning_number = get_winning_number();
 
-		// Calculate prizes
-		var total_prize = this.balance * 4 / 5;
-		var call_incentive = this.balance * 1 / 20;
+        // Calculate prizes
+        var total_prize = this.balance * 4 / 5;
+        var call_incentive = this.balance * 1 / 20;
 
-		// Distribute prize amongst winners
-		var num_of_winners = bets_lengths[winning_number];
+        // Distribute prize amongst winners
+        var num_of_winners = bets_lengths[winning_number];
 
-		if (num_of_winners > 0) {
-			var split_prize = total_prize / num_of_winners;
-			for (uint i = 0; i < num_of_winners; i++) {
-				if (!bets[winning_number][i].send(split_prize)) throw;
-			}
-		}
+        if (num_of_winners > 0) {
+            var split_prize = total_prize / num_of_winners;
+            for (uint i = 0; i < num_of_winners; i++) {
+                if (!bets[winning_number][i].send(split_prize)) throw;
+            }
+        }
 
-		// Reward caller of draw function
-		if (!msg.sender.send(call_incentive)) throw;
+        // Reward caller of draw function
+        if (!msg.sender.send(call_incentive)) throw;
 
-		// Reset state to allow new bets
-		reset_state();
-	}
+        // Reset state to allow new bets
+        reset_state();
+        Drawn(msg.sender, winning_number, num_of_winners);
+    }
 
-	function get_winning_number() private returns (uint) {
-		var range = (upper_bound - lower_bound) + 1;
-		var offset = uint256(block.blockhash(block.number-1)) % range;
-		return lower_bound + offset;
-	}
+    function get_winning_number() private returns (uint) {
+        var range = (upper_bound - lower_bound) + 1;
+        var offset = uint256(block.blockhash(block.number-1)) % range;
+        return lower_bound + offset;
+    }
 
+    function shutdown() {
+        if (total_bets == 0 && msg.sender == organiser) {
+            suicide(organiser);
+        }
+    }
 }
