@@ -54,7 +54,7 @@ function update_cost() {
 
 function init_slider() {
     $('#slide_01').on('input', function() {
-        var s = "Purchase Ticket (" + this.value.toString() + ")";
+        var s = "Purchase Ticket (Guess: " + this.value.toString() + ")";
         $('#purchase_button').text(s);
     });
 }
