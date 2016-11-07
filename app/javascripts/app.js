@@ -1,5 +1,6 @@
 var accounts;
 var account;
+var current_timeout;
 
 String.prototype.rjust = function( width, padding ) {
     padding = padding || " ";
@@ -11,10 +12,16 @@ String.prototype.rjust = function( width, padding ) {
 }
 
 function displayrise(val) {
-    var s = val.toString();
-    var res = "POOL "
+    var cval = Math.round(val);
+    var s = cval.toString();
+    var res = "POOL ";
+    var unit = " SZ";
+    if (s.length > 10) {
+        s = Math.round(val/1000000).toString();
+        unit = "ETH"
+    }
     res += s.rjust(10, "0");
-    res += " SZ";
+    res += unit;
     res = res.replace(/5/g, "S");
 
     display.setValue(res);
@@ -23,7 +30,7 @@ function displayrise(val) {
 function timeout_display(current, target, step) {
     if (current <= target) {
         displayrise(current);
-        setTimeout(timeout_display, 1, current + step, target, step);
+        current_timeout = setTimeout(timeout_display, 1, current + step, target, step);
     }
 }
 
@@ -39,6 +46,9 @@ function update_ticker() {
             var initial = total - 5000;
             if (initial < 0) {
                 initial = 0;
+            }
+            if (current_timeout) {
+                clearTimeout(current_timeout);
             }
             timeout_display(total - 5000, total, 1);
         }
@@ -65,13 +75,26 @@ function init_slider() {
 function init_draw_button() {
     var l = Lottery.deployed();
 
+
+    if (web3.eth.getBalance(l.address).toNumber() == 0) {
+        $('#draw_button').prop("disabled", true);
+        return;
+    }
+
     l.start_date.call().then(function(start_date) {
         l.waiting_period.call().then(function(waiting_period) {
-            var now = Math.round(new Date().getTime()/1000);
-            var diff = now - start_date;
-            if (diff >= waiting_period) {
-                $('#draw_button').removeAttr("disabled");
-            }
+            l.total_bets.call().then(function(total_bets) {
+                if (total_bets == 0) {
+                    $('#draw_button').prop("disabled", true);
+                    return null;
+                }
+                var now = Math.round(new Date().getTime()/1000);
+                var diff = now - start_date;
+                if (diff >= waiting_period) {
+                    $('#draw_button').removeAttr("disabled");
+                }
+                return null;
+            });
             return null;
         });
         return null;
@@ -81,9 +104,80 @@ function init_draw_button() {
 function perform_drawing() {
     var l = Lottery.deployed();
 
+    if (web3.eth.getBalance(l.address).toNumber() == 0) {
+        show_toast("Sorry, you can't draw since there's nothing in the pool.");
+        return;
+    }
+
     l.draw.estimateGas().then(function(gasEst) {
-        l.draw.sendTransaction({from: accounts[2], gas: gasEst * 1.5});
+        l.draw.sendTransaction({from: account, gas: gasEst * 1.5}).then(function(tx) {
+            show_toast("Thank you for drawing! Please check your account balance.");
+            return null;
+        });
+        return null;
     });
+}
+
+function change_active_address(acc_change) {
+    account = acc_change;
+    $('#active_address').text(account.substring(2));
+
+    show_toast('Active account switched to ' + account);
+}
+
+function show_toast(message) {
+    var snackbarContainer = document.querySelector('#demo-snackbar-example');
+    var showSnackbarButton = document.querySelector('#demo-show-snackbar');
+    var data = {
+      message: message,
+      timeout: 2000,
+    };
+    snackbarContainer.MaterialSnackbar.showSnackbar(data);
+}
+
+function populate_addresses() {
+    var address_container = $('#account_menu');
+    for (var i in accounts) {
+        var ta = '<li class="mdl-menu__item" onclick="change_active_address(\''
+            + accounts[i] + '\')">' + accounts[i].substring(2) + '</li>';
+        address_container.append(ta);
+    }
+}
+
+function perform_purchase() {
+    var l = Lottery.deployed();
+
+    var guess = $('#slide_01').get(0).value;
+    l.ticket_price.call().then(function(price) {
+        l.make_bet.sendTransaction(guess, {from: account, value: price, gas: 1000000}).then(function(tx) {
+            show_toast("Ticket purchased!");
+            update_ticker();
+            return null;
+        });
+        return null;
+    });
+}
+
+function add_event_watchers() {
+    var l = Lottery.deployed();
+
+    l.Drawn().watch(drawn_callback);
+    l.Betted().watch(betted_callback);
+}
+
+function drawn_callback(err, res) {
+    var msg = "Lottery has been drawn by " + res.args._drawer;
+    msg += ". Winning number was " + res.args.winning_number.toString();
+    msg += " (" + res.args.num_winners + " winners)";
+
+    show_toast(msg);
+    init_draw_button();
+    update_ticker();
+}
+
+function betted_callback(err, res) {
+    init_draw_button();
+    update_ticker();
 }
 
 window.onload = function() {
@@ -101,9 +195,12 @@ window.onload = function() {
     accounts = accs;
     account = accounts[0];
 
+    populate_addresses();
+    change_active_address(account);
     init_slider();
     init_draw_button();
     update_cost();
     update_ticker();
+    add_event_watchers();
   });
 }

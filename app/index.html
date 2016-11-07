@@ -22,7 +22,7 @@
     <meta name="description" content="Enter into a fun lottery and win some
     ethereum!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Material Design Lite</title>
+    <title>Decentralised Lottery</title>
 
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -67,6 +67,13 @@
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">Decentralised Lottery</span>
           <div class="mdl-layout-spacer"></div>
+          <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-js-ripple-effect">
+              <span id="active_address">7ba90bb3bff47a7da82bf0c5a2c53023a924540a</span>
+              <i class="material-icons">unfold_more</i>
+          </button>
+
+          <ul id="account_menu" class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
+          </ul>
         </div>
       </header>
       <div class="demo-ribbon"></div>
@@ -90,7 +97,7 @@
                   min="0" max="100" value="50" tabindex="0" id = "slide_01">
                 <br />
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="width: 95%"
-                    id="purchase_button">
+                    id="purchase_button" onclick="perform_purchase()">
                     Purchase Ticket (Guess: 50)
                 </button>
             </div>
@@ -120,6 +127,12 @@
         </footer>
       </main>
     </div>
+
+    <div id="demo-snackbar-example" class="mdl-js-snackbar mdl-snackbar">
+          <div class="mdl-snackbar__text"></div>
+            <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+
     <script src="https://code.getmdl.io/1.2.1/material.min.js"></script>
     <!--[if lt IE 9]>
         <script type="text/javascript" src="javascripts/excanvas.js"></script>
