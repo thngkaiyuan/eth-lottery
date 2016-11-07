@@ -42,7 +42,6 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should not let you buy a ticket if you pay more than the price", function() {
-        var getBalance = web3.eth.getBalance;
         var guess = 42;
 
         return Lottery.new(1, {from: accounts[3]}).then(function(l) {
@@ -85,7 +84,6 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should not let you buy a ticket if you pay less than the price", function() {
-        var getBalance = web3.eth.getBalance;
         var guess = 42;
 
         return Lottery.new(1, {from: accounts[3]}).then(function(l) {
@@ -93,6 +91,16 @@ contract('Lottery', function(accounts) {
                 return l.make_bet.sendTransaction(guess, {from: accounts[0], value: 0});
             }).then(function(e) {
                 assert.isDefined(e, "I got a ticket for free!");
+            });
+        });
+    });
+
+    it("Should not allow you to draw within waiting period", function() {
+        return Lottery.new(1000, {from: accounts[3]}).then(function(l) {
+            return getTransactionError(function() {
+                return l.draw.sendTransaction({from: accounts[0]});
+            }).then(function(e) {
+                assert.isDefined(e, "I am able to draw before waiting period ends.");
             });
         });
     });
