@@ -123,5 +123,8 @@ contract Lottery {
         if (total_bets == 0 && msg.sender == organiser) {
             suicide(organiser);
         }
+        else {
+            throw;
+        }
     }
 }

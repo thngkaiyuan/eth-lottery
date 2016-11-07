@@ -15,7 +15,7 @@ function displayrise(val) {
     var res = "POOL "
     res += s.rjust(10, "0");
     res += " SZ";
-    res = res.replace("5", "S");
+    res = res.replace(/5/g, "S");
 
     display.setValue(res);
 }
@@ -31,14 +31,17 @@ function update_ticker() {
     var l = Lottery.deployed();
 
     l.total_bets.call().then(function(tbets) {
-        l.ticket_price.call().then(function(tprice) {
-            var szprice = tprice / 1000000000000;
-            var total = tbets * szprice;
-            if (total > 0) {
-                timeout_display(total - 5000, total, 1);
+        var tpool = web3.eth.getBalance(l.address);
+        var te = document.getElementById("ticket_text");
+        te.textContent = "Tickets in Pool: " + tbets.toString();
+        var total = tpool / 1000000000000;
+        if (total > 0) {
+            var initial = total - 5000;
+            if (initial < 0) {
+                initial = 0;
             }
-            return null;
-        });
+            timeout_display(total - 5000, total, 1);
+        }
         return null;
     });
 }
