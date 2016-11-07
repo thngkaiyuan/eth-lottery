@@ -152,4 +152,38 @@ contract('Lottery', function(accounts) {
             });
         }).then(done).catch(done);
     });
+
+    it("Should not let you shutdown if you are not the organizer", function() {
+        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+            return getTransactionError(function() {
+                return l.shutdown({from: accounts[0]});
+            }).then(function(e) {
+                assert.isDefined(e, "I am able to shutdown the contract even I am not the organizer!");
+            });
+        });
+    });
+
+    it("Should not let you shutdown if total_bets is not 0", function() {
+        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+            return l.ticket_price.call().then(function(ticket_price) {
+                return l.make_bet.sendTransaction(42, {from: accounts[3], value: ticket_price}).then(function() {
+                    return getTransactionError(function() {
+                        return l.shutdown({from: accounts[3]});
+                    }).then(function(e) {
+                        assert.isDefined(e, "I am able to shutdown the contract when there are still bets.");
+                    });
+                });
+            });
+        });
+    });
+
+    it("Should let you shutdown if you are the organizer and there are not bets", function() {
+        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+            return getTransactionError(function() {
+                return l.shutdown({from: accounts[3]});
+            }).then(function(e) {
+                assert.isUndefined(e, "I am not able to shutdown although I am the organizer and there are not bets.");
+            });
+        });
+    });
 });
