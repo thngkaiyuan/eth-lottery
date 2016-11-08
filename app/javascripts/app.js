@@ -1,6 +1,7 @@
 var accounts;
 var account;
 var current_timeout;
+var init_block;
 
 String.prototype.rjust = function( width, padding ) {
     padding = padding || " ";
@@ -132,7 +133,7 @@ function perform_drawing() {
     }
 
     l.draw.estimateGas().then(function(gasEst) {
-        l.draw.sendTransaction({from: account, gas: gasEst * 1.5}).then(function(tx) {
+        l.draw.sendTransaction({from: account, gas: 1000000}).then(function(tx) {
             show_toast("Thank you for drawing! Please check your account balance.");
             return null;
         });
@@ -188,7 +189,12 @@ function add_event_watchers() {
 }
 
 function drawn_callback(err, res) {
-    var msg = "Lottery has been drawn by " + res.args._drawer;
+    if (res.blockNumber > init_block) {
+        var msg = "Lottery has been drawn by " + res.args._drawer;
+    }
+    else {
+        var msg = "Last drawn by " + res.args._drawer;
+    }
     msg += ". Winning number was " + res.args.winning_number.toString();
     msg += " (" + res.args.num_winners + " winners)";
 
@@ -221,6 +227,7 @@ window.onload = function() {
 
     accounts = accs;
     account = accounts[0];
+    init_block = web3.eth.blockNumber;
 
     populate_addresses();
     change_active_address(account);
