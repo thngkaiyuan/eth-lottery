@@ -91,12 +91,23 @@
             <h3>Buy a Ticket!</h3>
             <p id="guess_text">Select a guess and purchase your ticket. Cost of
             a ticket: </p>
-
             <div align="center">
+                <div class="mdl-textfield mdl-js-textfield
+                mdl-textfield--floating-label" style="width:95%">
+                    <input class="mdl-textfield__input" type="text"
+                    value="50" id="guess_textfield">
+                    <label class="mdl-textfield__label" for="sample3">Guess...</label>
+                </div>
                 <input class="mdl-slider mdl-js-slider" type="range"
-                  min="0" max="100" value="50" tabindex="0" id = "slide_01">
+                  min="0" max="100" value="50" tabindex="0" id = "slide_01"
+                  style="float: right;">
                 <br />
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="width: 95%"
+                <button class="mdl-button mdl-js-button mdl-button--raised
+                        mdl-js-ripple-effect mdl-button--accent" style="width:20%"
+                    id="pick_button" onclick="pick_for_me()">
+                    Pick for Me
+                </button>
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="width: 75%"
                     id="purchase_button" onclick="perform_purchase()">
                     Purchase Ticket (Guess: 50)
                 </button>

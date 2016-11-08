@@ -65,10 +65,32 @@ function update_cost() {
     });
 }
 
+function sync_guess(val) {
+    if (isNaN(val)) {
+        val = 0;
+    }
+    if (val > 100) {
+        val = 100;
+    }
+    if (val < 0) {
+        val = 0;
+    }
+    var s = "Purchase Ticket (Guess: " + val.toString() + ")";
+    $('#purchase_button').text(s);
+    $('#guess_textfield').get(0).value = val.toString();
+    $("#slide_01").get(0).MaterialSlider.change(val);
+}
+
 function init_slider() {
     $('#slide_01').on('input', function() {
-        var s = "Purchase Ticket (Guess: " + this.value.toString() + ")";
-        $('#purchase_button').text(s);
+        sync_guess(this.value);
+    });
+
+    $('#guess_textfield').keyup(function() {
+        if ($('#guess_textfield').val() != "") {
+            var val = parseInt($('#guess_textfield').val());
+            sync_guess(val);
+        }
     });
 }
 
@@ -178,6 +200,11 @@ function drawn_callback(err, res) {
 function betted_callback(err, res) {
     init_draw_button();
     update_ticker();
+}
+
+function pick_for_me() {
+    var random_guess = Math.floor((Math.random() * 101));
+    sync_guess(random_guess);
 }
 
 window.onload = function() {
