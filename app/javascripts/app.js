@@ -236,5 +236,6 @@ window.onload = function() {
     update_cost();
     update_ticker();
     add_event_watchers();
+    pick_for_me();
   });
 }
