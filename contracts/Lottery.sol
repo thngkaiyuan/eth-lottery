@@ -71,14 +71,20 @@ contract Lottery {
     * Takes a guess from the player and adds it to the existing round
     */
     function make_bet(uint guess) payable public {
-        // Check if the bet is made within the betting period
-        if (now - start_date > betting_period) throw;
-
         // Check if the sender sent the correct amount
         if (msg.value != ticket_price) throw;
 
         // Check if the guess is valid
         if (lower_bound > guess || guess > upper_bound) throw;
+
+        // Check if the ticket is the first one in the pool
+        if (total_bets == 0) {
+            start_date = now; // Start the countdown.
+        }
+        else {
+            // Check if the bet is made within the betting period
+            if ((now - start_date) > betting_period ) throw;
+        }
 
         // { guess => address } is recorded for prize distribution later
         insert_bet(guess, msg.sender);

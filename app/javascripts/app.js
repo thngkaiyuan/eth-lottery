@@ -1,6 +1,8 @@
 var accounts;
 var account;
 var current_timeout;
+var current_bettimeout;
+var current_drawtimeout;
 var init_block;
 
 String.prototype.rjust = function( width, padding ) {
@@ -35,24 +37,81 @@ function timeout_display(current, target, step) {
     }
 }
 
+function betcd_display(current) {
+    if (current > 0) {
+        var words = "Betting's closed in " + humanizeDuration(current * 1000) + "!";
+        $("#bet_cd").text(words);
+        current_bettimeout = setTimeout(betcd_display, 1000, current-1);
+    }
+    else {
+        update_ticker();
+    }
+}
+
+function drawcd_display(current) {
+    if (current > 0) {
+        var words = "Draw (Available in " + humanizeDuration(current * 1000) + ")";
+        $("#draw_button").text(words);
+        current_drawtimeout = setTimeout(drawcd_display, 1000, current-1);
+    }
+    else {
+        init_draw_button();
+    }
+}
+
 function update_ticker() {
     var l = Lottery.deployed();
 
-    l.total_bets.call().then(function(tbets) {
-        var tpool = web3.eth.getBalance(l.address);
-        var te = document.getElementById("ticket_text");
-        te.textContent = "Tickets in Pool: " + tbets.toString();
-        var total = tpool / 1000000000000;
-        if (total > 0) {
-            var initial = total - 10000;
-            if (initial < 0) {
-                initial = 0;
-            }
-            if (current_timeout) {
-                clearTimeout(current_timeout);
-            }
-            timeout_display(initial, total, 1);
-        }
+    l.start_date.call().then(function(start_date) {
+        l.betting_period.call().then(function(betting_period) {
+            l.total_bets.call().then(function(tbets) {
+                var tpool = web3.eth.getBalance(l.address);
+                var te = document.getElementById("ticket_text");
+                te.textContent = "Tickets in Pool: " + tbets.toString();
+                var total = tpool / 1000000000000;
+                if (total > 0) {
+                    var initial = total - 10000;
+                    if (initial < 0) {
+                        initial = 0;
+                    }
+                    if (current_timeout) {
+                        clearTimeout(current_timeout);
+                    }
+                    timeout_display(initial, total, 1);
+                }
+                if (current_bettimeout) {
+                    clearTimeout(current_bettimeout);
+                }
+                if (tbets == 0) {
+                    $("#bet_cd").text("There are no tickets in the pool. Be the first!");
+                        $('#guess_textfield').removeAttr("disabled");
+                        $('#slide_01').removeAttr("disabled");
+                        $('#pick_button').removeAttr("disabled");
+                        $('#purchase_button').removeAttr("disabled");
+                }
+                else {
+                    var now = Math.round(new Date().getTime()/1000);
+                    var diff = now - start_date.toNumber();
+                    var bperiod = betting_period.toNumber();
+                    if (diff >= bperiod) {
+                        $('#guess_textfield').prop("disabled", true);
+                        $('#slide_01').prop("disabled", true);
+                        $('#pick_button').prop("disabled", true);
+                        $('#purchase_button').prop("disabled", true);
+                        $("#bet_cd").text("Betting period is over! Please wait for the draw.");
+                    }
+                    else {
+                        $('#guess_textfield').removeAttr("disabled");
+                        $('#slide_01').removeAttr("disabled");
+                        $('#pick_button').removeAttr("disabled");
+                        $('#purchase_button').removeAttr("disabled");
+                        betcd_display(bperiod - diff);
+                    }
+                }
+                return null;
+            });
+            return null;
+        });
         return null;
     });
 }
@@ -105,17 +164,29 @@ function init_draw_button() {
     }
 
     l.start_date.call().then(function(start_date) {
-        l.waiting_period.call().then(function(waiting_period) {
-            l.total_bets.call().then(function(total_bets) {
-                if (total_bets == 0) {
-                    $('#draw_button').prop("disabled", true);
+        l.betting_period.call().then(function(betting_period) {
+            l.waiting_period.call().then(function(waiting_period) {
+                l.total_bets.call().then(function(total_bets) {
+                    if (total_bets == 0) {
+                        $('#draw_button').prop("disabled", true);
+                        return null;
+                    }
+                    var now = Math.round(new Date().getTime()/1000);
+                    var diff = now - start_date.toNumber();
+                    tperiod = betting_period.toNumber() + waiting_period.toNumber();
+                    if (diff >= tperiod) {
+                        $('#draw_button').removeAttr("disabled");
+                        if (current_drawtimeout) {
+                            clearTimeout(current_drawtimeout);
+                        }
+                        $('#draw_button').text("Draw")
+                    }
+                    else {
+                        var count = tperiod - diff
+                        drawcd_display(count);
+                    }
                     return null;
-                }
-                var now = Math.round(new Date().getTime()/1000);
-                var diff = now - start_date;
-                if (diff >= waiting_period) {
-                    $('#draw_button').removeAttr("disabled");
-                }
+                });
                 return null;
             });
             return null;
@@ -132,11 +203,8 @@ function perform_drawing() {
         return;
     }
 
-    l.draw.estimateGas().then(function(gasEst) {
-        l.draw.sendTransaction({from: account, gas: 1000000}).then(function(tx) {
-            show_toast("Thank you for drawing! \n The commission will be transferred to you shortly if you are the first to perform the draw.", 5000);
-            return null;
-        });
+    l.draw.sendTransaction({from: account, gas: 1000000}).then(function(tx) {
+        show_toast("Thank you for drawing! \n The commission will be transferred to you shortly if you are the first to perform the draw.", 5000);
         return null;
     });
 }
