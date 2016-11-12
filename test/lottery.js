@@ -18,7 +18,7 @@ contract('Lottery', function(accounts) {
 
         var my_init_balance = getBalance(accounts[0]).toNumber();
 
-        Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
             var contract_init_balance = getBalance(l.address).toNumber();
             l.bets_lengths.call(guess).then(function(init_num_bets) {
                 l.ticket_price.call().then(function(ticket_price) {
@@ -44,7 +44,7 @@ contract('Lottery', function(accounts) {
     it("Should not let you buy a ticket if you pay more than the price", function() {
         var guess = 42;
 
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
             return l.ticket_price.call().then(function(ticket_price) {
                 return getTransactionError(function() {
                     return l.make_bet.sendTransaction(guess, {from: accounts[0], value: ticket_price * 2});
@@ -56,7 +56,7 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should not let you buy a ticket if you guess lower than the lower bound", function() {
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
             return l.ticket_price.call().then(function(ticket_price) {
                 return l.lower_bound.call().then(function(lower_bound) {
                     return getTransactionError(function() {
@@ -70,7 +70,7 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should not let you buy a ticket if you guess higher than the upper bound", function() {
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
             return l.ticket_price.call().then(function(ticket_price) {
                 return l.upper_bound.call().then(function(upper_bound) {
                     return getTransactionError(function() {
@@ -86,7 +86,7 @@ contract('Lottery', function(accounts) {
     it("Should not let you buy a ticket if you pay less than the price", function() {
         var guess = 42;
 
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
             return getTransactionError(function() {
                 return l.make_bet.sendTransaction(guess, {from: accounts[0], value: 0});
             }).then(function(e) {
@@ -95,8 +95,18 @@ contract('Lottery', function(accounts) {
         });
     });
 
+    it("Should not allow you to draw within betting period", function() {
+        return Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
+            return getTransactionError(function() {
+                return l.draw.sendTransaction({from: accounts[0]});
+            }).then(function(e) {
+                assert.isDefined(e, "I am able to draw before waiting period ends.");
+            });
+        });
+    });
+
     it("Should not allow you to draw within waiting period", function() {
-        return Lottery.new(1000, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(0, 1000, {from: accounts[3]}).then(function(l) {
             return getTransactionError(function() {
                 return l.draw.sendTransaction({from: accounts[0]});
             }).then(function(e) {
@@ -108,7 +118,7 @@ contract('Lottery', function(accounts) {
     it("Should successfully perform draws", function(done) {
         var getBalance = web3.eth.getBalance;
 
-        Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        Lottery.new(1, 0, {from: accounts[3]}).then(function(l) {
             var contract_init_balance = getBalance(l.address).toNumber();
             l.ticket_price.call().then(function(ticket_price) {
                 for (var i = 0; i < 99; i++) {
@@ -142,7 +152,7 @@ contract('Lottery', function(accounts) {
 
     it("Should test the events", function(done) {
 
-        Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        Lottery.new(1, 0, {from: accounts[3]}).then(function(l) {
             l.ticket_price.call().then(function(ticket_price) {
                 l.make_bet.sendTransaction(42, {from: accounts[0], value: ticket_price}).then(function(_) {
                     l.draw.sendTransaction({from: accounts[1]}).then(function(_) {
@@ -162,7 +172,7 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should not let you shutdown if you are not the organizer", function() {
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(1, 0, {from: accounts[3]}).then(function(l) {
             return getTransactionError(function() {
                 return l.shutdown({from: accounts[0]});
             }).then(function(e) {
@@ -172,7 +182,7 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should not let you shutdown if total_bets is not 0", function() {
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(1000, 0, {from: accounts[3]}).then(function(l) {
             return l.ticket_price.call().then(function(ticket_price) {
                 return l.make_bet.sendTransaction(42, {from: accounts[3], value: ticket_price}).then(function() {
                     return getTransactionError(function() {
@@ -186,7 +196,7 @@ contract('Lottery', function(accounts) {
     });
 
     it("Should let you shutdown if you are the organizer and there are not bets", function() {
-        return Lottery.new(1, {from: accounts[3]}).then(function(l) {
+        return Lottery.new(0, 0, {from: accounts[3]}).then(function(l) {
             return getTransactionError(function() {
                 return l.shutdown({from: accounts[3]});
             }).then(function(e) {
