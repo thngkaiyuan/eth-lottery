@@ -148,12 +148,12 @@ function change_active_address(acc_change) {
     show_toast('Active account switched to ' + account);
 }
 
-function show_toast(message) {
+function show_toast(message, duration = 2000) {
     var snackbarContainer = document.querySelector('#demo-snackbar-example');
     var showSnackbarButton = document.querySelector('#demo-show-snackbar');
     var data = {
       message: message,
-      timeout: 2000,
+      timeout: duration,
     };
     snackbarContainer.MaterialSnackbar.showSnackbar(data);
 }
@@ -193,12 +193,12 @@ function drawn_callback(err, res) {
         var msg = "Lottery has been drawn by " + res.args._drawer;
     }
     else {
-        var msg = "Last drawn by " + res.args._drawer;
+        var msg = "Lottery was last drawn by " + res.args._drawer;
     }
-    msg += ". Winning number was " + res.args.winning_number.toString();
+    msg += ".\nWinning number was " + res.args.winning_number.toString();
     msg += " (" + res.args.num_winners + " winners)";
 
-    show_toast(msg);
+    show_toast(msg, 10000);
     init_draw_button();
     update_ticker();
 }
