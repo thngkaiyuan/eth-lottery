@@ -83,7 +83,7 @@ contract Lottery {
         }
         else {
             // Check if the bet is made within the betting period
-            if ((now - start_date) < betting_period ) throw;
+            if ((now - start_date) > betting_period ) throw;
         }
 
         // { guess => address } is recorded for prize distribution later
