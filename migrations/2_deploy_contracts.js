@@ -1,3 +1,3 @@
 module.exports = function(deployer) {
-  deployer.deploy(Lottery, 1);
+  deployer.deploy(Lottery, 60, 5);
 };

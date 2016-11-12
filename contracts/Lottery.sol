@@ -5,7 +5,8 @@ contract Lottery {
     // price of a ticket
     uint public ticket_price;
 
-    // waiting period to draw
+    uint public betting_period;
+    // waiting period before a draw can be made (after the betting period)
     uint public waiting_period;
 
     // date when lottery is opened
@@ -30,8 +31,9 @@ contract Lottery {
     event Drawn(address _drawer, uint winning_number, uint num_winners);
     event Betted(address _better, uint bet);
 
-    function Lottery(uint _waiting_period) {
+    function Lottery(uint _betting_period, uint _waiting_period) {
         ticket_price = 0.1 ether;
+        betting_period = _betting_period;
         waiting_period = _waiting_period;
         lower_bound = 0;
         upper_bound = 100;
@@ -69,6 +71,9 @@ contract Lottery {
     * Takes a guess from the player and adds it to the existing round
     */
     function make_bet(uint guess) payable public {
+        // Check if the bet is made within the betting period
+        if (now - start_date > betting_period) throw;
+
         // Check if the sender sent the correct amount
         if (msg.value != ticket_price) throw;
 
@@ -86,7 +91,7 @@ contract Lottery {
     */
     function draw() payable public {
         // Check guard conditions
-        if (now - start_date < waiting_period) throw;
+        if ((now - start_date) < (betting_period + waiting_period)) throw;
 
         // Pick winning number
         var winning_number = get_winning_number();
