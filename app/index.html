@@ -67,6 +67,7 @@
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">Decentralised Lottery</span>
           <div class="mdl-layout-spacer"></div>
+          Wallet:
           <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-js-ripple-effect">
               <span id="active_address">7ba90bb3bff47a7da82bf0c5a2c53023a924540a</span>
               <i class="material-icons">unfold_more</i>
@@ -88,36 +89,34 @@
                 </canvas>
                 <p id="ticket_text"><b>Tickets in Pool: 0</b></p>
             </div>
-            <h3>Buy a Ticket!</h3>
-            <p id="guess_text">Select a guess and purchase your ticket. Cost of
-            a ticket: </p>
-            <p>Feeling lucky? Generate a random guess with 'Pick For Me' and
-            click 'Purchase Ticket'!</p>
+            <h3>Get Lucky in 2 Steps!</h3>
             <div align="center">
                 <div class="mdl-textfield mdl-js-textfield
                 mdl-textfield--floating-label" style="width:95%">
                     <input class="mdl-textfield__input" type="text"
                     value="50" id="guess_textfield">
-                    <label class="mdl-textfield__label" for="sample3">Guess...</label>
+                    <label class="mdl-textfield__label" for="sample3">Your Lucky Number:</label>
                 </div>
                 <input class="mdl-slider mdl-js-slider" type="range"
                   min="0" max="100" value="50" tabindex="0" id = "slide_01"
                   style="float: right;">
                 <br />
                 <button class="mdl-button mdl-js-button mdl-button--raised
-                        mdl-js-ripple-effect mdl-button--colored" style="width:20%"
+                        mdl-js-ripple-effect mdl-button--colored" style="width:50%"
                     id="pick_button" onclick="pick_for_me()">
-                    Pick for Me
+                    (1) Ask The God Of Fortune For A Lucky Number
                 </button>
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="width: 75%"
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="width: 45%"
                     id="purchase_button" onclick="perform_purchase()">
-                    Purchase Ticket (Guess: 50)
+                    (2) Get Lucky With The Number 50!
                 </button>
+            <p id="guess_text">Bet amount: </p>
             </div>
             <br />
             <hr>
-            <h3>Perform a Drawing</h3>
-            <p>Earn some commission by performing the drawing!</p>
+            <h3>Guaranteed Win</h3>
+            <p>Want to win some money no matter what?</p>
+            <p>Be the first person to help us perform the lottery draw and you will be <b><u>guaranteed to win 5% of the pool!</u></b></p>
             <div align="center">
                 <button class="mdl-button mdl-js-button mdl-button--raised
                         mdl-js-ripple-effect mdl-button--accent" disabled style="width: 95%"

@@ -44,14 +44,14 @@ function update_ticker() {
         te.textContent = "Tickets in Pool: " + tbets.toString();
         var total = tpool / 1000000000000;
         if (total > 0) {
-            var initial = total - 5000;
+            var initial = total - 10000;
             if (initial < 0) {
                 initial = 0;
             }
             if (current_timeout) {
                 clearTimeout(current_timeout);
             }
-            timeout_display(total - 5000, total, 1);
+            timeout_display(initial, total, 1);
         }
         return null;
     });
@@ -76,7 +76,7 @@ function sync_guess(val) {
     if (val < 0) {
         val = 0;
     }
-    var s = "Purchase Ticket (Guess: " + val.toString() + ")";
+    var s = "(2) Get Lucky With The Number " + val.toString() + "!";
     $('#purchase_button').text(s);
     $('#guess_textfield').get(0).value = val.toString();
     $("#slide_01").get(0).MaterialSlider.change(val);
@@ -134,7 +134,7 @@ function perform_drawing() {
 
     l.draw.estimateGas().then(function(gasEst) {
         l.draw.sendTransaction({from: account, gas: 1000000}).then(function(tx) {
-            show_toast("Thank you for drawing! Please check your account balance.");
+            show_toast("Thank you for drawing! \n The commission will be transferred to you shortly if you are the first to perform the draw.", 5000);
             return null;
         });
         return null;
@@ -173,7 +173,7 @@ function perform_purchase() {
     var guess = $('#slide_01').get(0).value;
     l.ticket_price.call().then(function(price) {
         l.make_bet.sendTransaction(guess, {from: account, value: price, gas: 1000000}).then(function(tx) {
-            show_toast("Ticket purchased!");
+            show_toast("May the odds be ever in your favour!");
             update_ticker();
             return null;
         });
