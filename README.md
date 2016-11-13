@@ -21,7 +21,7 @@ There are several reasons why Eth-Lottery is a preferred choice over other lotte
 <br>
 # How It Works
 
-1. Initialization
+1. **Initialization**
 
   During contract initialization, the following parameters will be set:
   - The ticket price (e.g. 0.1 ether)
@@ -31,7 +31,7 @@ There are several reasons why Eth-Lottery is a preferred choice over other lotte
   - The organiser of the lottery (e.g. us)
   On top of initializing the parameters mentioned above, the constructor will also set the total number of bets to zero and reset all bet records.
   
-2. Placing Bets
+2. **Placing Bets**
 
   Bets are made by sending a transaction with the make_bet() function. When bets are made, validations checks are first done to ensure that (1) the bet is made within the betting period, (2) the correct amount was sent and (3) the bet number falls within the permitted bounds. Then, the sender’s wallet address is added to a data structure that maps valid bet numbers to a list of wallet addresses.
   
@@ -41,7 +41,7 @@ There are several reasons why Eth-Lottery is a preferred choice over other lotte
   
   Every time a bet is placed, a Betted event is emitted containing the better’s address and the number bet.
 
-3. Performing the Draw
+3. **Performing the Draw**
 
   At the end of the betting period, a mandatory waiting period is imposed in which no action may be taken. After the waiting period has elapsed, players will be allowed (and in fact incentivized, as we will see later on) to perform the lottery draw. Draws are performed by sending a transaction with the draw() function. 
   
@@ -49,7 +49,7 @@ There are several reasons why Eth-Lottery is a preferred choice over other lotte
   
   Every time the draw is performed, a Drawn event is emitted containing the drawer’s address, the winning number, and the number of winners.
   
-4. Ensuring the Randomness of the Winning Number
+4. **Ensuring the Randomness of the Winning Number**
 
   There are several options for obtaining a random winning number:
   - Consult an external oracle (e.g. Oracalize.It). This option requires everyone to trust the external oracle and its source of randomness. Obviously, this is undesirable as we want a solution that is completely decentralized from any single entity.
