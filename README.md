@@ -78,6 +78,7 @@ There are several reasons why Eth-Lottery is a preferred choice over other lotte
 
 1. Make sure you have [TestRPC](https://github.com/ethereumjs/testrpc) and [Truffle](https://github.com/ConsenSys/truffle) installed
 2. Run testrpc using `testrpc`
-3. To migrate and deploy, run `truffle migrate --reset`
-4. To run tests, run `truffle test`
-5. To serve the web application, run `truffle serve`
+3. In a separate console, run:
+  1. `truffle migrate --reset` to migrate and deploy
+  2. `truffle test` to execute the test suite
+  3. `truffle serve` to serve the web application
